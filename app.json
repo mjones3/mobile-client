@@ -1,0 +1,25 @@
+{
+    "expo": {
+        "sdkVersion": "29.0.0",
+        "version": "1.2.6",
+        "orientation": "portrait",
+        "privacy": "public",
+        "icon": "./app.png",
+        "primaryColor": "#00BAFF",
+        "splash": {
+            "image": "./splash2.jpg",
+            "backgroundColor": "#00BAFF",
+            "resizeMode": "cover"
+        },
+        "androidStatusBar": {
+            "barStyle": "light-content",
+            "backgroundColor": "#00BAFF"
+        },
+        "packagerOpts": {
+            "assetExts": ["ttf"]
+        },
+        "ios": {
+            "bundleIdentifier": "com.wcandillon.dopurplesky"
+        }
+    }
+}
