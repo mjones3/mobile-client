@@ -34,8 +34,9 @@ export default class Field extends React.Component<FieldProps, FieldState> {
     render(): React.Node {
         const {label, last, inverse, defaultValue, right, textInputRef, children} = this.props;
         const {value} = this.state;
-        const style = inverse ? { color: "white" } : {};
-        const itemStyle = inverse ? { borderColor: "white" } : {};
+        const style = inverse ? { color: "black" } : {};
+        const itemStyle = inverse ? { borderColor: "black" } : {};
+        // const error =  { borderColor: "red"};
         const keysToFilter = ["right", "defaultValue", "inverse", "label", "last"];
         const props = _.pickBy(this.props, (v, key) => keysToFilter.indexOf(key) === -1);
         if (React.Children.count(children) > 0) {
@@ -78,5 +79,7 @@ export default class Field extends React.Component<FieldProps, FieldState> {
 }
 
 const styles = StyleSheet.create({
-    field: { borderBottomWidth: 0 }
+    field: {
+        borderBottomWidth: 0
+    }
 });

@@ -34,6 +34,9 @@ const Styles = StyleSheet.create({
     blackText: {
         color: "black"
     },
+    redText: {
+        color: "red"
+    },
     grayText: {
         color: variables.listBorderColor
     },

@@ -24,7 +24,7 @@ export default class Login extends React.Component<ScreenProps<>> {
     render(): React.Node {
         return (
             <View style={styles.container}>
-                <Image source={Images.login} style={styles.image} />
+
                 <SafeAreaView style={StyleSheet.absoluteFill}>
                     <Content style={[StyleSheet.absoluteFill, styles.content]}>
                         <AnimatedView style={styles.innerContent}>
