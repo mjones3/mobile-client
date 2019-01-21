@@ -20,6 +20,18 @@
         },
         "ios": {
             "bundleIdentifier": "com.wcandillon.dopurplesky"
+//            "facebookScheme": "fb582787468813986",
+//            "facebookAppId": "582787468813986",
+//            "facebookDisplayName": "Practice Journal App"
         }
+//        "expo": {
+//            "name": "My app",
+//            "slug": "my-app",
+//            "sdkVersion": "UNVERSIONED",
+//            "privacy": "public"
+//            "facebookScheme": "",
+//            "facebookAppId": "582787468813986",
+//            "facebookDisplayName": "Practice Journal App"
+//        }
     }
 }

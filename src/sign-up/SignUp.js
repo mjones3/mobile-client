@@ -1,6 +1,6 @@
 // @flow
 import * as React from "react";
-import {View, Image, StyleSheet, TextInput} from "react-native";
+import {View, Image, StyleSheet, TextInput, AsyncStorage} from "react-native";
 import {Button, Header, Left, Right, Body, Icon, Title, Text, Content} from "native-base";
 import {Constants} from "expo";
 
@@ -11,6 +11,10 @@ import variables from "../../native-base-theme/variables/commonColor";
 import addNewUser from "./UserREST";
 
 import validate from "validate.js"
+import base64 from "base-64";
+
+var HttpStatus = require('http-status-codes');
+
 
 // var validate = require("validate.js");
 
@@ -35,6 +39,17 @@ export default class SignUp extends React.Component<ScreenProps<>> {
     emailAddress: TextInput;
     password: TextInput;
 
+    async getItem(key) {
+        try {
+            //we want to wait for the Promise returned by AsyncStorage.setItem()
+            //to be resolved to the actual value before returning the value
+            var jsonOfItem = JSON.stringify(await AsyncStorage.getItem(key));
+            return jsonOfItem;
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
 
     setFirstNameRef = (input: TextInput) => this.firstName = input._root;
     goToFirstName = () => this.firstName.focus();
@@ -51,6 +66,18 @@ export default class SignUp extends React.Component<ScreenProps<>> {
 
     back = () => this.props.navigation.navigate("Login");
     signIn = () => this.props.navigation.navigate("Walkthrough");
+
+    async storeItem(key, item) {
+        try {
+            //we want to wait for the Promise returned by AsyncStorage.setItem()
+            //to be resolved to the actual value before returning the value
+            var jsonOfItem = await AsyncStorage.setItem(key, JSON.stringify(item));
+            return jsonOfItem;
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+
 
     addNewUser = () => {
 
@@ -75,6 +102,9 @@ export default class SignUp extends React.Component<ScreenProps<>> {
             }
         }
 
+
+
+
         let errors = validate(this.state.form, constraints)
 
         console.log(this.state.form)
@@ -95,8 +125,7 @@ export default class SignUp extends React.Component<ScreenProps<>> {
             // });
 
 
-            console.log("adding new user ('" + uuid + "'")
-
+            console.log("adding new user ('" + uuid + "')")
 
             let body =
                 JSON.stringify(
@@ -111,16 +140,70 @@ export default class SignUp extends React.Component<ScreenProps<>> {
                         createdDate: new Date()
                     });
 
-            fetch("http://192.168.1.11:5555/api/registration/v1/user/" + uuid, {
+            fetch("http://localhost:5555/api/registration/v1/user/" + uuid, {
                 method: "POST",
                 headers: {
                     Accept: "application/json",
                     "Content-Type": "application/json"
                 },
                 body: body
-            });
+            }).then(response => {
+                console.log('posted: ' + body);
+                console.log("register response: " + JSON.stringify(response));
 
-            console.log('posted: ' + body);
+
+                if (response.status == HttpStatus.CONFLICT) {
+                    this.setState({errors: "There is already a user registered with this email address." })
+                }
+
+
+
+                //log in and get token
+
+                let headers = new Headers();
+                headers.append('Authorization', 'Basic ' + base64.encode('practicejournal' + ":" + 'thisissecret'));
+                headers.append('Content-Type', 'application/json')
+
+                var formData  = new FormData();
+                formData.append('grant_type', 'password');
+                formData.append('scope', 'mobileclient');
+                formData.append('username', this.state.form.emailAddress);
+                formData.append('password', this.state.form.password);
+
+                fetch('http://localhost:8901/auth/oauth/token', {
+                    method: 'POST',
+                    headers: headers,
+                    body: formData
+                }).then(response => {
+
+                    console.log(JSON.stringify(response));
+
+                    response.text().then( body => {
+
+
+                        this.storeItem("username", this.state.form.emailAddress);
+                        this.storeItem("password", this.state.form.password);
+
+
+                        if (body.access_token != undefined) {
+                            this.storeItem("token", body.access_token);
+                        }
+
+                        console.log(body);
+                        let jsonBody = JSON.parse(body);
+
+                        if (jsonBody.hasOwnProperty('access_token')) {
+                            let token = jsonBody['access_token'];
+                            console.log(token);
+                            this.storeItem("token", token);
+                        }
+
+                    })
+
+                    console.log(response);
+                });
+
+            });
 
         }
 
