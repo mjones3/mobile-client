@@ -10,17 +10,20 @@ import type {ScreenProps} from "../components/Types";
 import variables from "../../native-base-theme/variables/commonColor";
 import addNewUser from "./UserREST";
 
-import validate from "validate.js"
+import validate from "validate.js";
 import base64 from "base-64";
+// import RegistrationService from "../service/registration"
+import {registerAndStoreToken, getToken} from "../service/registration";
+import {storeItem, getItem} from "../service/storage"
 
-var HttpStatus = require('http-status-codes');
+var HttpStatus = require("http-status-codes");
 
 
 // var validate = require("validate.js");
 
 // import uuid from "uuid/v4";
 
-const uuidv4 = require('uuid/v4');
+const uuidv4 = require("uuid/v4");
 
 // const bcrypt = require('bcrypt');
 // const saltRounds = 10;
@@ -29,26 +32,15 @@ const uuidv4 = require('uuid/v4');
 
 export default class SignUp extends React.Component<ScreenProps<>> {
 
-    constructor(props) {
+    constructor(props, registrationService: RegistrationService) {
         super(props);
-        this.state = {form: {firstName: '', lastName: '', emailAddress: '', password: ''}, errors: ''};
+        this.state = {form: {firstName: "", lastName: "", emailAddress: "", password: ""}, errors: ""};
     }
 
     firstName: TextInput;
     lastName: TextInput;
     emailAddress: TextInput;
     password: TextInput;
-
-    async getItem(key) {
-        try {
-            //we want to wait for the Promise returned by AsyncStorage.setItem()
-            //to be resolved to the actual value before returning the value
-            var jsonOfItem = JSON.stringify(await AsyncStorage.getItem(key));
-            return jsonOfItem;
-        } catch (error) {
-            console.log(error.message);
-        }
-    }
 
 
     setFirstNameRef = (input: TextInput) => this.firstName = input._root;
@@ -66,17 +58,6 @@ export default class SignUp extends React.Component<ScreenProps<>> {
 
     back = () => this.props.navigation.navigate("Login");
     signIn = () => this.props.navigation.navigate("Walkthrough");
-
-    async storeItem(key, item) {
-        try {
-            //we want to wait for the Promise returned by AsyncStorage.setItem()
-            //to be resolved to the actual value before returning the value
-            var jsonOfItem = await AsyncStorage.setItem(key, JSON.stringify(item));
-            return jsonOfItem;
-        } catch (error) {
-            console.log(error.message);
-        }
-    }
 
 
     addNewUser = () => {
@@ -100,21 +81,19 @@ export default class SignUp extends React.Component<ScreenProps<>> {
                     minimum: 6
                 }
             }
-        }
+        };
 
 
+        let formErrors = validate(this.state.form, constraints);
 
+        console.log(this.state.form);
+        // console.log(formErrors);
 
-        let errors = validate(this.state.form, constraints)
-
-        console.log(this.state.form)
-        console.log(errors);
-
-        if (errors != undefined) {
-            this.setState({errors: "Please fix errors to continue." })
+        if (formErrors != undefined) {
+            this.setState({errors: "Please fix errors to continue."});
         } else {
 
-            this.state.errors = "";
+            // this.state.errors = "";
 
             let uuid = uuidv4();
 
@@ -125,94 +104,53 @@ export default class SignUp extends React.Component<ScreenProps<>> {
             // });
 
 
-            console.log("adding new user ('" + uuid + "')")
+            console.log("adding new user ('" + uuid + "')");
 
             let body =
-                JSON.stringify(
-                    {
-                        userId: uuid,
-                        emailAddress: this.state.form.emailAddress,
-                        firstName:  this.state.form.firstName,
-                        lastName: this.state.form.lastName,
-                        password: this.state.form.password,
-                        roleId: "6a8e4a82-7226-4eee-9e20-f65ff0f5457b",
-                        enabled: true,
-                        createdDate: new Date()
-                    });
-
-            fetch("http://localhost:5555/api/registration/v1/user/" + uuid, {
-                method: "POST",
-                headers: {
-                    Accept: "application/json",
-                    "Content-Type": "application/json"
-                },
-                body: body
-            }).then(response => {
-                console.log('posted: ' + body);
-                console.log("register response: " + JSON.stringify(response));
+                {
+                    userId: uuid,
+                    emailAddress: this.state.form.emailAddress.toLowerCase(),
+                    firstName: this.state.form.firstName,
+                    lastName: this.state.form.lastName,
+                    password: this.state.form.password,
+                    roleId: "6a8e4a82-7226-4eee-9e20-f65ff0f5457b",
+                    enabled: true,
+                    createdDate: new Date()
+                };
 
 
-                if (response.status == HttpStatus.CONFLICT) {
-                    this.setState({errors: "There is already a user registered with this email address." })
-                }
+            let errorsFromRegistrationService = {errors: ""};
 
+            registerAndStoreToken(body)
+                .then((response) => {
+                    if (response.status == HttpStatus.CONFLICT) {
+                        this.setState({errors: "There is already a user registered with that email address."});
+                        return;
+                    }
 
+                    storeItem("username", body.emailAddress)
+                    storeItem("password", body.password)
 
-                //log in and get token
+                    getToken(body.emailAddress, body.password)
+                        .then((response) => {
 
-                let headers = new Headers();
-                headers.append('Authorization', 'Basic ' + base64.encode('practicejournal' + ":" + 'thisissecret'));
-                headers.append('Content-Type', 'application/json')
+                            response.text()
+                                .then(body => {
+                                    body = JSON.parse(body)
+                                    if (body['access_token'] != undefined) {
+                                        storeItem("token", body['access_token'])
+                                        console.log("token: " + body['access_token']);
+                                    }
+                                    // console.log(body);
+                                    this.setState({errors: ""});
+                                })
 
-                var formData  = new FormData();
-                formData.append('grant_type', 'password');
-                formData.append('scope', 'mobileclient');
-                formData.append('username', this.state.form.emailAddress);
-                formData.append('password', this.state.form.password);
-
-                fetch('http://localhost:8901/auth/oauth/token', {
-                    method: 'POST',
-                    headers: headers,
-                    body: formData
-                }).then(response => {
-
-                    console.log(JSON.stringify(response));
-
-                    response.text().then( body => {
-
-
-                        this.storeItem("username", this.state.form.emailAddress);
-                        this.storeItem("password", this.state.form.password);
-
-
-                        if (body.access_token != undefined) {
-                            this.storeItem("token", body.access_token);
-                        }
-
-                        console.log(body);
-                        let jsonBody = JSON.parse(body);
-
-                        if (jsonBody.hasOwnProperty('access_token')) {
-                            let token = jsonBody['access_token'];
-                            console.log(token);
-                            this.storeItem("token", token);
-                        }
-
-                    })
-
-                    console.log(response);
+                        });
                 });
-
-            });
-
         }
 
-    }
+    };
 
-    // addNewUser = this.addNewUser.bind(this);
-
-
-    // addNewUser
 
     render(): React.Node {
         return (

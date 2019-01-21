@@ -3,8 +3,8 @@ import * as React from "react";
 import {StyleSheet, Image, View, TextInput, SafeAreaView} from "react-native";
 import {H1, Button, Text, Content} from "native-base";
 
-import { Constants, Facebook } from 'expo';
-
+import {Constants, Facebook} from "expo";
+import {registerAndStoreToken, getToken} from "../service/registration";
 import Mark from "./Mark";
 
 import {Images, WindowDimensions, Field, Small, Styles} from "../components";
@@ -15,8 +15,9 @@ import variables from "../../native-base-theme/variables/commonColor";
 
 import base64 from "base-64";
 
-import { AsyncStorage } from "react-native"
-import Store from 'react-native-store';
+import {AsyncStorage} from "react-native";
+import Store from "react-native-store";
+import {storeItem, getItem, getAllKeys} from "../service/storage";
 
 
 export default class Login extends React.Component<ScreenProps<>> {
@@ -24,7 +25,7 @@ export default class Login extends React.Component<ScreenProps<>> {
 
     constructor(props) {
         super(props);
-        this.state = {form: {username: '', password: '', errors: ''}};
+        this.state = {form: {username: "", password: "", errors: ""}};
 
         this.DB = {
             "user": Store.model("user")
@@ -34,116 +35,48 @@ export default class Login extends React.Component<ScreenProps<>> {
 
     password: TextInput;
 
-    setPasswordRef = (input: TextInput) => this.password = input._root
-    goToPassword = () => this.password.focus()
+    setPasswordRef = (input: TextInput) => this.password = input._root;
+    goToPassword = () => this.password.focus();
 
 
-    saveToken = async (token) => {
-        try {
-            await AsyncStorage.setItem('authtoken', token);
-        } catch (error) {
-            // Error saving data
-        }
-    }
+    signIn = () => {
 
+        getToken(this.state.form.username, this.state.form.password)
+            .then(
+                (response) => {
+                    console.log("response status: " + response.status);
+                    response.text()
+                        .then(body => {
 
-    saveUsernameAndPassword = async (username, password) => {
-        try {
-            await AsyncStorage.setItem('username', username);
-            await AsyncStorage.setItem('password', password);
-        } catch (error) {
-            // Error saving data
-        }
-    }
+                            storeItem("username", this.state.form.username);
+                            storeItem("password", this.state.form.password);
+                            if (body.access_token != undefined) {
+                                storeItem("token", body.access_token);
+                            }
 
+                            // console.log(body);
+                            let jsonBody = JSON.parse(body);
 
-    async storeItem(key, item) {
-        try {
-            //we want to wait for the Promise returned by AsyncStorage.setItem()
-            //to be resolved to the actual value before returning the value
-            var jsonOfItem = await AsyncStorage.setItem(key, JSON.stringify(item));
-            return jsonOfItem;
-        } catch (error) {
-            console.log(error.message);
-        }
-    }
+                            if (jsonBody.hasOwnProperty("access_token")) {
+                                let token = jsonBody["access_token"];
+                                console.log("token: " + token);
+                                storeItem("token", token);
+                            }
 
+                            getAllKeys();
 
-    async getAllKeys() {
-        try {
-            const value = await AsyncStorage.getAllKeys();
-            if (value !== null) {
-                // We have data!!
-                console.log(value);
-            }
-        } catch (error) {
-            // Error retrieving data
-        }
-    }
+                        });
 
-
-
-
-    signIn = (username, password) => {
-
-        var formData  = new FormData();
-        formData.append('grant_type', 'password');
-        formData.append('scope', 'mobileclient');
-        formData.append('username', this.state.form.username);
-        formData.append('password', this.state.form.password);
-
-        console.log(JSON.stringify(formData));
-
-        let headers = new Headers();
-        headers.append('Authorization', 'Basic ' + base64.encode('practicejournal' + ":" + 'thisissecret'));
-        headers.append('Content-Type', 'application/json')
-
-
-        fetch('http://localhost:8901/auth/oauth/token', {
-            method: 'POST',
-            headers: headers,
-            body: formData
-        }).then(response => {
-
-            console.log(JSON.stringify(response));
-
-            response.text().then( body => {
-
-
-                // this.DB.user.add({username: this.state.form.username});
-                // this.DB.user.add({password: this.state.form.password});
-                // this.DB.user.find().then(resp => console.log(resp))
-
-                this.storeItem("username", this.state.form.username);
-                this.storeItem("password", this.state.form.password);
-                if (body.access_token != undefined) {
-                    this.storeItem("token", body.access_token);
-                }
-
-                console.log(body);
-                let jsonBody = JSON.parse(body);
-
-                if (jsonBody.hasOwnProperty('access_token')) {
-                    let token = jsonBody['access_token'];
-                    console.log(token);
-                    this.storeItem("token", token);
-                }
-
-                this.getAllKeys();
-
-            })
-
-            console.log(response);
-        });
-
+                });
 
     }
-    signUp = () => this.props.navigation.navigate("SignUp")
+
+
+    signUp = () => this.props.navigation.navigate("SignUp");
 
     render(): React.Node {
 
-        return (
-            <View style={styles.container}>
+        return (<View style={styles.container}>
 
                 <SafeAreaView style={StyleSheet.absoluteFill}>
                     <Content style={[StyleSheet.absoluteFill, styles.content]}>
@@ -190,7 +123,8 @@ export default class Login extends React.Component<ScreenProps<>> {
                     </Content>
                 </SafeAreaView>
             </View>
-        );
+        )
+            ;
     }
 }
 
