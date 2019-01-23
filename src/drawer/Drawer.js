@@ -39,19 +39,19 @@ export default class Drawer extends React.Component<NavigationProps<>> {
                 <View style={style.itemContainer}>
                     <View style={style.row}>
                         <DrawerItem {...{navigation}} name="Home" icon="ios-home-outline" left />
-                        <DrawerItem {...{navigation}} name="Calendar" icon="ios-calendar-outline" />
+                        <DrawerItem {...{navigation}} name="Practice" icon="ios-time-outline"  />
                     </View>
                     <View style={style.row}>
-                        <DrawerItem {...{navigation}} name="Groups" icon="ios-apps-outline" left />
-                        <DrawerItem {...{navigation}} name="Overview" icon="ios-analytics-outline" />
+                        <DrawerItem {...{navigation}} name="Calendar" icon="ios-calendar-outline" left/>
+                        <DrawerItem {...{navigation}} name="Goals" icon="ios-analytics-outline" />
                     </View>
                     <View style={style.row}>
-                        <DrawerItem {...{navigation}} name="Lists" icon="ios-list-outline" left />
-                        <DrawerItem {...{navigation}} name="Profile" icon="ios-contact-outline" />
+                        <DrawerItem {...{navigation}} name="Pieces" icon="ios-musical-notes-outline" left />
+                        <DrawerItem {...{navigation}} name="Technique" icon="ios-time-outline" />
                     </View>
                     <View style={style.row}>
-                        <DrawerItem {...{navigation}} name="Timeline" icon="ios-time-outline" left />
-                        <DrawerItem {...{navigation}} name="Settings" icon="ios-options-outline" />
+                        <DrawerItem {...{navigation}} name="Settings" icon="ios-options-outline" left/>
+                        <DrawerItem {...{navigation}} name="Profile" icon="ios-contact-outline"  />
                     </View>
                 </View>
                 <Button transparent block onPress={this.login}>
@@ -70,6 +70,7 @@ type DrawerItemProps = NavigationProps<> & {
 
 class DrawerItem extends React.PureComponent<DrawerItemProps> {
     render(): React.Node {
+
         const {name, navigation, icon, left} = this.props;
         const navState = this.props.navigation.state;
         const active = navState.routes[navState.index].key === name;
@@ -118,7 +119,7 @@ const style = StyleSheet.create({
         borderColor: variables.listBorderColor
     },
     dot: {
-        backgroundColor: "white",
+        backgroundColor: "black",
         height: 10,
         width: 10,
         borderRadius: 5,

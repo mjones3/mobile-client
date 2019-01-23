@@ -9,7 +9,7 @@ import type {ScreenProps} from "../components/Types";
 
 import variables from "../../native-base-theme/variables/commonColor";
 
-export default class Walkthrough extends React.Component<ScreenProps<>> {
+export default class WalkthroughInstruments extends React.Component<ScreenProps<>> {
 
     swiper: Swiper;
 

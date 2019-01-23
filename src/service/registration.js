@@ -2,10 +2,7 @@ import base64 from "base-64";
 
 var HttpStatus = require("http-status-codes");
 
-export class RegistrationService {
 
-
-}
 
 export function registerAndStoreToken(body, errors) {
 

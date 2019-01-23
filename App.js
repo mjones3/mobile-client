@@ -23,16 +23,19 @@ import {Create} from "./src/create";
 
 import getTheme from "./native-base-theme/components";
 import variables from "./native-base-theme/variables/commonColor";
+import {isUserLoggedIn} from "./src/db/user"
 
-type AppState = {
-    ready: boolean
-};
+    type AppState = {
+        ready: boolean
+    };
 
 export default class App extends React.Component<{}, AppState> {
 
     state = {
         ready: false
     };
+
+
 
     componentWillMount() {
         const promises = [];
@@ -44,8 +47,12 @@ export default class App extends React.Component<{}, AppState> {
             .then(() => this.setState({ ready: true }))
             // eslint-disable-next-line
             .catch(error => console.error(error));
-    }
 
+
+    }
+    getRouteBasedOnLoggedInStatus() {
+        return "Home"
+    }
     render(): React.Node {
         const {ready} = this.state;
         return (
@@ -61,6 +68,8 @@ export default class App extends React.Component<{}, AppState> {
         );
     }
 }
+
+
 
 const MainNavigator = createDrawerNavigator({
     Home: { screen: Home },
@@ -88,7 +97,8 @@ const AppNavigator = createSwitchNavigator({
     headerMode: "none",
     cardStyle: {
         backgroundColor: variables.brandInfo
-    }
+    },
+    initialRouteName: isUserLoggedIn() ? "Login" : "Main"
 });
 
 export {AppNavigator};

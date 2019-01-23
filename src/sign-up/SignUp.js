@@ -14,7 +14,10 @@ import validate from "validate.js";
 import base64 from "base-64";
 // import RegistrationService from "../service/registration"
 import {registerAndStoreToken, getToken} from "../service/registration";
-import {storeItem, getItem} from "../service/storage"
+import {storeItem, getItem} from "../service/storage";
+import {saveUserDetails, createUserDB} from "../db/user"
+
+import {User} from "../model/user";
 
 var HttpStatus = require("http-status-codes");
 
@@ -57,7 +60,7 @@ export default class SignUp extends React.Component<ScreenProps<>> {
 
 
     back = () => this.props.navigation.navigate("Login");
-    signIn = () => this.props.navigation.navigate("Walkthrough");
+    signIn = () => this.props.navigation.navigate("WalkthroughInstruments");
 
 
     addNewUser = () => {
@@ -128,27 +131,42 @@ export default class SignUp extends React.Component<ScreenProps<>> {
                         return;
                     }
 
-                    storeItem("username", body.emailAddress)
-                    storeItem("password", body.password)
+
+                    storeItem("username", body.emailAddress);
+                    storeItem("password", body.password);
 
                     getToken(body.emailAddress, body.password)
                         .then((response) => {
 
                             response.text()
                                 .then(body => {
-                                    body = JSON.parse(body)
-                                    if (body['access_token'] != undefined) {
-                                        storeItem("token", body['access_token'])
-                                        console.log("token: " + body['access_token']);
-                                    }
-                                    // console.log(body);
-                                    this.setState({errors: ""});
-                                })
+                                        body = JSON.parse(body);
 
+                                        if (body["access_token"] != undefined) {
+                                            storeItem("token", body["access_token"]);
+                                            console.log("token: " + body["access_token"]);
+
+                                            let user = new  User(uuid,
+                                                this.state.form.firstName,
+                                                this.state.form.lastName,
+                                                this.state.form.emailAddress.toLowerCase(),
+                                                this.state.form.password,
+                                                body["access_token"])
+
+                                            createUserDB()
+                                            saveUserDetails(user);
+
+                                            this.props.navigation.navigate("Walkthrough");
+                                        }
+                                        else {
+                                            this.setState({errors: ""});
+                                        }
+                                        // console.log(body);
+                                    }
+                                );
                         });
                 });
         }
-
     };
 
 

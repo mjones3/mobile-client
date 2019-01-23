@@ -18,6 +18,8 @@ import base64 from "base-64";
 import {AsyncStorage} from "react-native";
 import Store from "react-native-store";
 import {storeItem, getItem, getAllKeys} from "../service/storage";
+var HttpStatus = require("http-status-codes");
+
 
 
 export default class Login extends React.Component<ScreenProps<>> {
@@ -26,12 +28,9 @@ export default class Login extends React.Component<ScreenProps<>> {
     constructor(props) {
         super(props);
         this.state = {form: {username: "", password: "", errors: ""}};
-
-        this.DB = {
-            "user": Store.model("user")
-        };
     }
 
+    main = () => this.props.navigation.navigate("Main")
 
     password: TextInput;
 
@@ -40,37 +39,31 @@ export default class Login extends React.Component<ScreenProps<>> {
 
 
     signIn = () => {
-
         getToken(this.state.form.username, this.state.form.password)
             .then(
                 (response) => {
                     console.log("response status: " + response.status);
-                    response.text()
-                        .then(body => {
 
-                            storeItem("username", this.state.form.username);
-                            storeItem("password", this.state.form.password);
-                            if (body.access_token != undefined) {
-                                storeItem("token", body.access_token);
-                            }
+                    if (response.status == HttpStatus.OK) {
 
-                            // console.log(body);
-                            let jsonBody = JSON.parse(body);
+                        response.text()
+                            .then(body => {
 
-                            if (jsonBody.hasOwnProperty("access_token")) {
-                                let token = jsonBody["access_token"];
-                                console.log("token: " + token);
-                                storeItem("token", token);
-                            }
+                                body = JSON.parse(body)
+                                console.log("body: " + JSON.stringify(body));
+                                // console.log(body["access_token"]);
 
-                            getAllKeys();
+                                if (body.hasOwnProperty('access_token')) {
+                                    console.log("token: " + body.access_token);
 
-                        });
-
+                                    this.props.navigation.navigate("Main")
+                                }
+                                // console.log(body);
+                                getAllKeys();
+                            });
+                    }
                 });
-
     }
-
 
     signUp = () => this.props.navigation.navigate("SignUp");
 
@@ -102,7 +95,7 @@ export default class Login extends React.Component<ScreenProps<>> {
                                     returnKeyType="go"
                                     onChangeText={(text) => this.state.form.password = text}
                                     textInputRef={this.setPasswordRef}
-                                    onSubmitEditing={this.signIn()}
+                                    onSubmitEditing={this.signIn}
                                     last
                                     inverse
                                 />

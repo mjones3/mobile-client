@@ -23,7 +23,7 @@ export default {
 
     // Badge
   badgeBg: '#ED1727',
-  badgeColor: '#fff',
+  badgeColor: '#000',
     // New Variable
   badgePadding: 3,
 
@@ -47,10 +47,10 @@ export default {
 
   // Segment
   segmentBackgroundColor: '#3F51B5',
-  segmentActiveBackgroundColor: '#fff',
-  segmentTextColor: '#fff',
+  segmentActiveBackgroundColor: '#000',
+  segmentTextColor: '#000',
   segmentActiveTextColor: '#3F51B5',
-  segmentBorderColor: '#fff',
+  segmentBorderColor: '#000',
   segmentBorderColorMain: '#3F51B5',
 
     // New Variable
@@ -113,7 +113,7 @@ export default {
 
 
     // Card
-  cardDefaultBg: '#fff',
+  cardDefaultBg: '#000',
 
 
       // Color
@@ -149,24 +149,24 @@ export default {
   footerDefaultBg: "transparent",
 
     // FooterTab
-  tabBarTextColor: 'white',
+  tabBarTextColor: 'black',
   tabBarTextSize: 14,
   activeTab: '#007aff',
   sTabBarActiveTextColor: '#007aff',
-  tabBarActiveTextColor: '#fff',
+  tabBarActiveTextColor: '#000',
   tabActiveBgColor: "transparent",
 
     // Tab
   tabDefaultBg: 'transparent',
   topTabBarTextColor: '#b3c7f9',
-  topTabBarActiveTextColor: '#fff',
+  topTabBarActiveTextColor: '#000',
   topTabActiveBgColor: '#1569f4',
-  topTabBarBorderColor: '#fff',
+  topTabBarBorderColor: '#000',
   get topTabBarActiveBorderColor() { return "white"; },
 
 
     // Header
-  toolbarBtnColor: "white",
+  toolbarBtnColor: "black",
   toolbarDefaultBg: '#00BAFF',
   toolbarHeight: 64,
   toolbarIconSize: 20,
@@ -174,7 +174,7 @@ export default {
   toolbarInputColor: '#CECDD2',
   searchBarHeight: 30,
   toolbarInverseBg: '#222',
-  toolbarTextColor: "white",
+  toolbarTextColor: "black",
   iosStatusbar: 'light-content',
   toolbarDefaultBorder: '#2874F0',
   get statusBarColor() {
@@ -198,7 +198,7 @@ export default {
   get inputColor() {
     return this.textColor;
   },
-  inputColorPlaceholder: "white",
+  inputColorPlaceholder: "black",
 
   inputGroupMarginBottom: 10,
   inputHeightBase: 50,
@@ -219,7 +219,7 @@ export default {
 
 
     // List
-  listBorderColor: 'rgba(255, 255, 255, .5)',
+  listBorderColor: 'rgba(0, 0, 0, 1)',
   listDividerBg: lightGray,
   listItemHeight: 45,
   listBtnUnderlayColor: '#DDD',
@@ -265,8 +265,8 @@ export default {
 
 
     // Text
-  textColor: "white",
-  inverseTextColor: 'black',
+  textColor: "black",
+  inverseTextColor: 'white',
   noteFontSize: 14,
 
 
@@ -274,7 +274,7 @@ export default {
   titleFontfamily: "Avenir-Light",
   titleFontSize: 17,
   subTitleFontSize: 12,
-  subtitleColor: '#FFF',
+  subtitleColor: '#000',
 
     // New Variable
   titleFontColor: "white",
